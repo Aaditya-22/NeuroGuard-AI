@@ -1,3 +1,4 @@
+import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import numpy as np
@@ -5,7 +6,15 @@ import pickle
 import sqlite3
 
 app = Flask(__name__)
-CORS(app)
+
+# 1. DYNAMIC CORS (Allows both local testing and your live website)
+# Replace the Vercel link with your actual one!
+CORS(app, resources={r"/*": {
+    "origins": [
+        "http://localhost:3000",
+        "https://neuroguard-ai-aaditya.vercel.app" # <--- Put your Vercel link here
+    ]
+}})
 
 # Database Setup
 db = sqlite3.connect("users.db", check_same_thread=False)
@@ -15,9 +24,12 @@ db.commit()
 
 # Load Model
 try:
-    with open("model.pkl", "rb") as f:
+    # Use absolute path for Render stability
+    model_path = os.path.join(os.path.dirname(__file__), "model.pkl")
+    with open(model_path, "rb") as f:
         model = pickle.load(f)
-except:
+except Exception as e:
+    print(f"Model Load Warning: {e}")
     model = None
 
 @app.route("/register", methods=["POST"])
@@ -54,7 +66,7 @@ def predict():
     err_rate = 1.0 - avg_mem
     const_val = 0.9 if (avg_mem > 0.7 and r < 1.5) else 0.2
 
-    # 3. Features array [memory, reaction, error, consistency]
+    # 3. Features array
     features = np.array([[avg_mem, r, err_rate, const_val]])
     
     prob = 0.15
@@ -65,7 +77,6 @@ def predict():
             prob = 0.85 if avg_mem < 0.4 else 0.15
 
     # 4. Strict Decision Logic
-    # High Risk if AI says so OR if user failed more than half the tests
     if prob > 0.45 or avg_mem < 0.4:
         risk_level = "High Risk 🔴"
     elif prob > 0.20:
@@ -85,5 +96,7 @@ def predict():
         "next_difficulty": 1.5 if avg_mem > 0.8 else 1.0
     })
 
+# Render needs the port to be dynamic
 if __name__ == "__main__":
-    app.run(debug=True, port=5001)
+    port = int(os.environ.get("PORT", 5001))
+    app.run(host="0.0.0.0", port=port)
