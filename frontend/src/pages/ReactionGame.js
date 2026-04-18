@@ -13,10 +13,7 @@ export default function ReactionGame() {
     setState("wait");
     setReactionTime(null);
     const waitDuration = (Math.random() * 3000 + 1000) / aiDifficulty;
-    setTimeout(() => {
-      setState("go");
-      setStartTime(Date.now());
-    }, waitDuration);
+    setTimeout(() => { setState("go"); setStartTime(Date.now()); }, waitDuration);
   };
 
   const handleClick = async () => {
@@ -33,25 +30,25 @@ export default function ReactionGame() {
         sequence_score: localStorage.getItem("sequence") || 0,
         stroop_score: localStorage.getItem("stroop") || 0,
         pattern_score: localStorage.getItem("pattern") || 0,
-        reaction_time: time
+        reaction_time: time,
+        current_difficulty: aiDifficulty
       });
       localStorage.setItem("aiReport", JSON.stringify(response.data));
+      localStorage.setItem('gameDifficulty', response.data.next_difficulty.toString());
       setTimeout(() => navigate("/result"), 1200);
     } catch (err) { navigate("/result"); }
   };
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-slate-50">
-      <div className="bg-white p-12 rounded-[3.5rem] shadow-2xl border border-slate-100 text-center">
-        <h2 className="text-3xl font-black mb-10 text-slate-800">⚡ Reaction Test</h2>
-        <div onClick={handleClick} className={`w-72 h-72 flex flex-col items-center justify-center text-white rounded-[2.5rem] cursor-pointer transition-all duration-300 shadow-2xl ${state === "go" ? "bg-green-500 scale-105" : "bg-slate-400"}`}>
-          <span className="text-4xl font-black uppercase">{state === "idle" ? "Start" : state === "go" ? "CLICK!" : state === "done" ? "Done!" : "Wait..."}</span>
-          {state === "done" && <span className="text-xl font-bold mt-2">{reactionTime.toFixed(0)}ms</span>}
-        </div>
-        {(state === "idle" || state === "done") && (
-          <button onClick={startGame} className="mt-12 bg-slate-900 text-white font-black py-4 px-12 rounded-2xl">Begin Test</button>
-        )}
+      <div className="mb-4 font-black text-emerald-500 uppercase tracking-widest">Level {aiDifficulty.toFixed(1)}x</div>
+      <div onClick={handleClick} className={`w-72 h-72 flex flex-col items-center justify-center text-white rounded-[2.5rem] cursor-pointer transition-all duration-300 shadow-2xl ${state === "go" ? "bg-green-500 scale-105" : "bg-slate-400"}`}>
+        <span className="text-4xl font-black uppercase">{state === "go" ? "CLICK!" : state === "done" ? "DONE!" : "WAIT..."}</span>
+        {state === "done" && <span className="text-xl font-bold mt-2">{reactionTime.toFixed(0)}ms</span>}
       </div>
+      {(state === "idle" || state === "done") && (
+        <button onClick={startGame} className="mt-12 bg-slate-900 text-white font-black py-4 px-12 rounded-2xl">Begin Sensor</button>
+      )}
     </div>
   );
 }

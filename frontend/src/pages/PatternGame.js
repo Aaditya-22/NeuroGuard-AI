@@ -28,27 +28,24 @@ export default function PatternGame() {
       const API_URL = process.env.REACT_APP_API_URL || "https://neuroguard-backend.onrender.com";
       const response = await axios.post(`${API_URL}/predict`, {
         pattern_score: score,
-        reaction_time: (Date.now() - startTime) / 1000
+        reaction_time: (Date.now() - startTime) / 1000,
+        current_difficulty: aiDifficulty
       });
       localStorage.setItem("aiReport", JSON.stringify(response.data));
+      localStorage.setItem('gameDifficulty', response.data.next_difficulty.toString());
     } catch (err) { console.log("AI Offline"); }
     navigate("/reaction");
   };
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-slate-50">
-      <div className="mb-6 text-xs font-black text-indigo-500 bg-indigo-50 px-6 py-2 rounded-full border">
-        AI Complexity Level: {aiDifficulty.toFixed(1)}x
-      </div>
+      <div className="mb-6 text-xs font-black text-indigo-500 bg-indigo-50 px-6 py-2 rounded-full border">AI Complexity: {aiDifficulty.toFixed(1)}x</div>
       <div className="bg-white p-12 rounded-[3rem] shadow-2xl text-center max-w-sm w-full border border-slate-100">
-        <h2 className="text-3xl font-black mb-10 text-slate-800">🧩 Pattern Test</h2>
         <div className="flex justify-center gap-2 mb-8">
-          {data.seq.map((n, i) => (
-            <div key={i} className="w-12 h-12 flex items-center justify-center bg-slate-100 text-slate-700 font-black rounded-xl border-b-4 border-slate-200">{n}</div>
-          ))}
+          {data.seq.map((n, i) => ( <div key={i} className="w-12 h-12 flex items-center justify-center bg-slate-100 text-slate-700 font-black rounded-xl border-b-4">{n}</div> ))}
           <div className="w-12 h-12 flex items-center justify-center bg-indigo-600 text-white font-black rounded-xl animate-pulse">?</div>
         </div>
-        <input autoFocus type="number" className="border-2 p-4 rounded-2xl w-full mb-6 text-center text-2xl font-black" placeholder="Next number..." onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && check()} />
+        <input autoFocus type="number" className="border-2 p-4 rounded-2xl w-full mb-6 text-center text-2xl font-black" onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && check()} />
         <button onClick={check} className="w-full bg-slate-900 text-white font-black py-5 rounded-2xl shadow-xl">Submit to AI</button>
       </div>
     </div>
