@@ -17,7 +17,9 @@ CORS(app, resources={r"/*": {
 }})
 
 # Database Setup
-db = sqlite3.connect("users.db", check_same_thread=False)
+basedir = os.path.abspath(os.path.dirname(__file__))
+db_path = os.path.join(basedir, "users.db")
+db = sqlite3.connect(db_path, check_same_thread=False)
 cursor = db.cursor()
 cursor.execute("CREATE TABLE IF NOT EXISTS users (email TEXT PRIMARY KEY, password TEXT)")
 db.commit()
