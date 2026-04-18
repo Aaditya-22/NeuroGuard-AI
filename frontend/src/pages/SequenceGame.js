@@ -4,7 +4,13 @@ import axios from "axios";
 
 export default function SequenceGame() {
   const navigate = useNavigate();
-  const [sequence] = useState([...Array(5)].map(() => Math.floor(Math.random() * 9) + 1));
+  const generate = () => {
+    let arr = [];
+    for (let i = 0; i < 5; i++) { arr.push(Math.floor(Math.random() * 9) + 1); }
+    return arr;
+  };
+
+  const [sequence] = useState(generate());
   const [stage, setStage] = useState("show");
   const [input, setInput] = useState("");
   const [jumbled, setJumbled] = useState([]);
@@ -27,7 +33,7 @@ export default function SequenceGame() {
     localStorage.setItem("sequence", score);
 
     try {
-      const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5001";
+      const API_URL = process.env.REACT_APP_API_URL || "https://neuroguard-backend.onrender.com";
       const response = await axios.post(`${API_URL}/predict`, {
         sequence_score: score,
         reaction_time: reactionTime
@@ -40,16 +46,17 @@ export default function SequenceGame() {
   return (
     <div className="flex flex-col items-center mt-10">
       <h2 className="text-2xl font-bold mb-4">🔢 Sequence Test</h2>
-      {stage === "show" ? (
+      {stage === "show" && (
         <div className="flex gap-2 text-2xl">
           {sequence.map((n, i) => ( <div key={i} className="p-3 bg-purple-200 rounded">{n}</div> ))}
         </div>
-      ) : (
+      )}
+      {stage === "input" && (
         <>
           <div className="flex gap-2 text-2xl mb-4">
             {jumbled.map((n, i) => ( <div key={i} className="p-3 bg-yellow-200 rounded">{n}</div> ))}
           </div>
-          <input className="border p-2" onChange={(e) => setInput(e.target.value)} />
+          <input className="border p-2 mt-2" placeholder="e.g. 12345" onChange={(e) => setInput(e.target.value)} />
           <button onClick={check} className="mt-4 bg-purple-500 text-white px-4 py-2 rounded">Submit</button>
         </>
       )}
