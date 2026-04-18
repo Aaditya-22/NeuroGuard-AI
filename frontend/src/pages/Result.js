@@ -6,7 +6,6 @@ export default function Result() {
   const navigate = useNavigate();
   const [aiReport, setAiReport] = useState(null);
 
-  // Get game scores from the phone's memory
   const memory = Number(localStorage.getItem("memory") || 0);
   const sequence = Number(localStorage.getItem("sequence") || 0);
   const stroop = Number(localStorage.getItem("stroop") || 0);
@@ -18,13 +17,12 @@ export default function Result() {
     if (saved) setAiReport(JSON.parse(saved));
   }, []);
 
-  // Prepare data for the Bar Graph
   const data = [
     { name: "Memory", value: Math.round(memory * 100), color: "#3b82f6" },
     { name: "Seq", value: Math.round(sequence * 100), color: "#8b5cf6" },
     { name: "Stroop", value: Math.round((stroop / 5) * 100), color: "#f59e0b" },
     { name: "Logic", value: Math.round(pattern * 100), color: "#ec4899" },
-    { name: "Speed", value: Math.round(Math.max(10, 100 - (reaction * 10))), color: "#10b981" }
+    { name: "Speed", value: reaction === 0 ? 0 : Math.round(Math.max(10, 100 - (reaction / 10))), color: "#10b981" }
   ];
 
   const handleReturn = () => {
@@ -38,7 +36,6 @@ export default function Result() {
         <h1 className="text-4xl font-black text-slate-900 mb-8">AI Diagnostic <span className="text-blue-600">Report</span></h1>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Big Number Card */}
           <div className="bg-white p-8 rounded-[3rem] shadow-xl border border-slate-100 text-center">
             {aiReport ? (
               <>
@@ -55,7 +52,6 @@ export default function Result() {
             ) : <p className="text-slate-400 italic py-10">Waiting for game data...</p>}
           </div>
 
-          {/* Graph Card */}
           <div className="bg-white p-8 rounded-[3rem] shadow-xl border border-slate-100" style={{ height: "450px" }}>
              <h3 className="text-xs font-black text-slate-800 mb-8 uppercase tracking-widest">Cognitive Pillars (%)</h3>
              <ResponsiveContainer width="100%" height="80%">
@@ -70,11 +66,8 @@ export default function Result() {
              </ResponsiveContainer>
           </div>
         </div>
-
         <div className="mt-12 text-center">
-          <button onClick={handleReturn} className="text-blue-600 font-bold hover:underline text-sm uppercase tracking-widest">
-            Back to Dashboard
-          </button>
+          <button onClick={handleReturn} className="text-blue-600 font-bold hover:underline text-sm uppercase tracking-widest">Back to Dashboard</button>
         </div>
       </div>
     </div>

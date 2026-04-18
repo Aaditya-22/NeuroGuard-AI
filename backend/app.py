@@ -53,17 +53,16 @@ def login():
 def predict():
     data = request.get_json()
     
-    # 1. Get scores from games
+    # 1. Pull scores
     m = float(data.get("memory_score", 0))
     s = float(data.get("sequence_score", 0))
     st = float(data.get("stroop_score", 0))
     p = float(data.get("pattern_score", 0))
     r = float(data.get("reaction_time", 0))
 
-    # 2. Math Logic
+    # 2. Logic (Matching your CSV logic)
     avg_mem = (m + s + st + p) / 4
     prob = 0.15 
-    
     if model:
         try:
             err_rate = 1.0 - avg_mem
@@ -73,7 +72,6 @@ def predict():
         except:
             prob = 0.85 if avg_mem < 0.4 else 0.15
 
-    # 3. Choose the Color/Risk
     if prob > 0.45 or avg_mem < 0.4:
         risk_level = "High Risk 🔴"
     elif prob > 0.20:
@@ -81,17 +79,16 @@ def predict():
     else:
         risk_level = "Low Risk 🟢"
 
-    # 4. Write the "AI Insights"
     insights = []
     if avg_mem < 0.5: insights.append("Significant cognitive lapses detected.")
     if r > 2.0: insights.append("Motor response speed is delayed.")
     if not insights: insights.append("Cognitive markers are stable.")
 
-    # 5. Send EVERYTHING back to the website
     return jsonify({
         "risk_level": risk_level,
-        "probability": f"{prob * 100:.0f}%", # This makes it look like "15%"
-        "explanation": insights
+        "probability": f"{prob * 100:.0f}%",
+        "explanation": insights,
+        "next_difficulty": 1.5 if avg_mem > 0.8 else 1.0
     })
 
 if __name__ == "__main__":
