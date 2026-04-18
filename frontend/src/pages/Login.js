@@ -11,21 +11,33 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
+  // --- THE SMART HANDSHAKE ---
+  // This looks at Vercel settings first. If empty, it uses your laptop address.
+  const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5001";
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const endpoint = isLogin ? "/login" : "/register";
+    
     try {
-      const res = await axios.post(`http://127.0.0.1:5001${endpoint}`, { email, password });
+      // We use backticks (`) and ${} to combine the Address and the Endpoint
+      const res = await axios.post(`${API_URL}${endpoint}`, { email, password });
+      
       alert(res.data.message);
+      
       if (isLogin) {
         localStorage.setItem("userEmail", email);
         localStorage.setItem("isLoggedIn", "true");
         navigate("/dashboard");
       } else {
+        // After registering, switch to login view so they can sign in
         setIsLogin(true);
       }
     } catch (err) {
-      alert(err.response?.data?.message || "Server Error.");
+      console.error("Connection details:", err);
+      // Helpful alert to tell you if the brain is just sleeping
+      const errorMsg = err.response?.data?.message || "Server Error. The brain might be sleeping—wait 30s and try again!";
+      alert(errorMsg);
     }
   };
 
@@ -76,7 +88,6 @@ export default function Login() {
       <div className="relative z-10 bg-slate-900/40 backdrop-blur-3xl p-10 rounded-[4rem] shadow-[0_0_120px_rgba(0,0,0,0.9)] w-full max-w-md border border-white/10 transition-all hover:border-blue-500/30">
         
         <div className="text-center mb-10 group cursor-default">
-            {/* FLOATING BRAIN ICON */}
             <div className="inline-block p-5 bg-gradient-to-br from-indigo-500/20 to-blue-600/20 rounded-[2.5rem] mb-5 shadow-inner border border-white/5 animate-float-brain">
                 <span className="text-5xl block transform group-hover:rotate-12 transition-transform duration-500">🧠</span>
             </div>
@@ -134,7 +145,6 @@ export default function Login() {
         </div>
       </div>
       
-      {/* Branding Footer */}
       <div className="relative z-10 mt-12 flex flex-col items-center gap-2">
           <p className="text-white/20 text-[9px] font-bold uppercase tracking-[0.6em]">
             Empowering Brain Health
